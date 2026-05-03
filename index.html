@@ -3,41 +3,79 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rock Paper Scissors GAME</title>
+    <meta name="description" content="A premium Rock Paper Scissors game with modern aesthetics and smooth animations." />
+    <meta name="keywords" content="Rock Paper Scissors, RPS Game, Web Game, JavaScript, CSS, Premium Design" />
+    <title>Rock Paper Scissors | Premium Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
-    <h1>Rock, Paper and Scissors</h1>
-    <div class="container">
-      <div class="choice" id="scissors">
-        <img src="./images/sessoers.png" alt="scissors" />
-      </div>
-      <div class="choice" id="paper">
-        <img src="./images/paper.png" alt="paper" />
-      </div>
-      <div class="choice" id="rock">
-        <img src="./images/rock.png" alt="rock" />
-      </div>
-    </div>
-<div class="userchoice" id="userchoice">
-  your choice :
-</div>
-<div id="user-score">
-  user-score :
-  <p id="users-score">0</p>
-</div>
-<div class="compchoice" id="compchoice">
-  comp choice :
-</div>
-    <div id="comp-score">
-      comp-score :
-      <p id="comps-score">0</p>
-    </div>
+    <header>
+      <h1>Rock Paper Scissors</h1>
+    </header>
 
-    <div class="result" id="result">
-      play youre move
-    </div>
+    <main>
+      <section class="game-container" id="game-container">
+        <div class="choices-container">
+          <button class="choice" id="rock" aria-label="Rock">
+            <img src="./images/rock.png" alt="Rock" />
+            <span>Rock</span>
+          </button>
+          <button class="choice" id="paper" aria-label="Paper">
+            <img src="./images/paper.png" alt="Paper" />
+            <span>Paper</span>
+          </button>
+          <button class="choice" id="scissors" aria-label="Scissors">
+            <img src="./images/scissors.png" alt="Scissors" />
+            <span>Scissors</span>
+          </button>
+        </div>
+
+        <div class="score-board">
+          <div class="hud-top">
+            <div id="rank-badge" class="rank-badge">Rank: Rookie</div>
+            <div id="high-score-display" class="stat-badge">Best Score: 0</div>
+          </div>
+          
+          <div class="score-main">
+            <div class="score-card user">
+              <span class="label">Player</span>
+              <p id="users-score">0</p>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="score-card computer">
+              <span class="label">CPU</span>
+              <p id="comps-score">0</p>
+            </div>
+          </div>
+
+          <div class="hud-bottom">
+            <div id="streak-badge" class="streak-badge">Streak: 0</div>
+            <div id="best-streak-display" class="stat-badge">Best: 0</div>
+          </div>
+        </div>
+
+        <div id="combo-burst" class="combo-burst">COMBO x2</div>
+        <div id="outcome-burst" class="outcome-burst">VICTORY</div>
+
+        <div class="match-info-hud">
+          <div class="match-slot player">
+            <span class="label">PLAYER</span>
+            <span id="userchoice" class="val">—</span>
+          </div>
+          <div class="match-slot vs">VS</div>
+          <div class="match-slot cpu">
+            <span class="label">CPU</span>
+            <span id="compchoice" class="val">—</span>
+          </div>
+        </div>
+
+        <button id="reset-btn" class="reset-button">Reset Session</button>
+      </section>
+    </main>
 
     <script src="./script.js"></script>
   </body>

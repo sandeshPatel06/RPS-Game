@@ -1,88 +1,153 @@
-// Get all the elements with the class "choice"
+// DOM Elements
 const choices = document.querySelectorAll(".choice");
-
-// Get reference to display elements
-const resultDisplay = document.getElementById("result");
-const userChoiceDisplay = document.getElementById("userchoice");
-const compChoiceDisplay = document.getElementById("compchoice");
 const userScoreDisplay = document.getElementById("users-score");
 const compScoreDisplay = document.getElementById("comps-score");
+const streakBadge = document.getElementById("streak-badge");
+const bestStreakDisplay = document.getElementById("best-streak-display");
+const highScoreDisplay = document.getElementById("high-score-display");
+const rankBadge = document.getElementById("rank-badge");
+const comboBurst = document.getElementById("combo-burst");
+const outcomeBurst = document.getElementById("outcome-burst");
+const userChoiceVal = document.getElementById("userchoice");
+const compChoiceVal = document.getElementById("compchoice");
+const gameContainer = document.getElementById("game-container");
+const resetBtn = document.getElementById("reset-btn");
 
-// Initialize user and computer scores
+// Game State
 let userScore = 0;
 let compScore = 0;
+let winStreak = 0;
+let bestStreak = localStorage.getItem("rps-best-streak") || 0;
+let highScore = localStorage.getItem("rps-high-score") || 0;
+let isPlaying = false;
 
-// Function to update the score based on game outcome
-const updateScore = (userWin) => {
-  if (userWin) {
-    userScore += 1;
-    resultDisplay.innerText = "You win!";
-    resultDisplay.style.backgroundColor = "green"; // Green for a win
+/**
+ * Ranks based on total wins
+ */
+const getRank = (score) => {
+  if (score >= 50) return "Grandmaster";
+  if (score >= 30) return "Master";
+  if (score >= 20) return "Elite";
+  if (score >= 10) return "Veteran";
+  return "Rookie";
+};
+
+/**
+ * Updates HUD stats and Rank
+ */
+const updateStats = () => {
+  if (userScore > highScore) {
+    highScore = userScore;
+    localStorage.setItem("rps-high-score", highScore);
+  }
+  highScoreDisplay.innerText = `Best Score: ${highScore}`;
+
+  if (winStreak > bestStreak) {
+    bestStreak = winStreak;
+    localStorage.setItem("rps-best-streak", bestStreak);
+  }
+  bestStreakDisplay.innerText = `Best: ${bestStreak}`;
+
+  rankBadge.innerText = `Rank: ${getRank(userScore)}`;
+
+  if (winStreak >= 2) {
+    streakBadge.innerText = `🔥 Streak: ${winStreak}`;
+    streakBadge.classList.add("active");
   } else {
-    compScore += 1;
-    resultDisplay.innerText = "You lose!";
-    resultDisplay.style.backgroundColor = "red"; // Red for a loss
+    streakBadge.classList.remove("active");
+  }
+};
+
+/**
+ * Triggers Burst Animations (Combo or Outcome)
+ */
+const triggerBurst = (type, text, outcome) => {
+  const target = type === "combo" ? comboBurst : outcomeBurst;
+  
+  target.innerText = text;
+  target.className = type === "combo" ? "combo-burst active" : `outcome-burst active ${outcome}`;
+  
+  setTimeout(() => {
+    target.classList.remove("active");
+  }, 2000); // Increased duration for better visibility
+};
+
+/**
+ * Visual Feedback for Wins/Losses
+ */
+const triggerFeedback = (outcome) => {
+  gameContainer.classList.remove("win-flash", "lose-flash", "draw-pulse");
+  void gameContainer.offsetWidth; 
+  
+  if (outcome === "win") {
+    gameContainer.classList.add("win-flash");
+    if (winStreak >= 2) triggerBurst("combo", `COMBO x${winStreak}`);
+  } else if (outcome === "lose") {
+    gameContainer.classList.add("lose-flash");
+  } else {
+    gameContainer.classList.add("draw-pulse");
+  }
+};
+
+/**
+ * Updates the game score and triggers the burst
+ */
+const finalizeRound = (outcome, userChoice, compChoice) => {
+  if (outcome === "win") {
+    userScore++;
+    winStreak++;
+  } else if (outcome === "lose") {
+    compScore++;
+    winStreak = 0;
+  } else {
+    winStreak = 0;
   }
 
-  // Update score on the UI
+  userChoiceVal.innerText = userChoice;
+  compChoiceVal.innerText = compChoice;
+
+  const resultText = outcome === "win" ? "VICTORY!" : (outcome === "lose" ? "DEFEAT" : "DRAW");
+  triggerBurst("outcome", resultText, outcome);
+  triggerFeedback(outcome);
+  updateStats();
+
   userScoreDisplay.innerText = userScore;
   compScoreDisplay.innerText = compScore;
+  
+  isPlaying = false;
 };
 
-// Function to handle a draw
-const handleDraw = () => {
-  resultDisplay.innerText = "It's a draw!";
-  resultDisplay.style.backgroundColor = "yellow"; // Yellow for a draw
-};
+const playRound = (userChoice) => {
+  if (isPlaying) return;
+  isPlaying = true;
 
-// Function to determine the winner
-const determineWinner = (userChoice, compChoice) => {
-  if (userChoice === compChoice) {
-    handleDraw(); // If both choices are the same, it's a draw
-  } else {
-    let userWin = checkWinner(userChoice, compChoice);
-    updateScore(userWin); // Update score based on whether user won or lost
-  }
-};
-
-// Function to check the winning logic
-const checkWinner = (userChoice, compChoice) => {
-  switch (userChoice) {
-    case "rock":
-      return compChoice === "scissors"; // Rock beats scissors
-    case "paper":
-      return compChoice === "rock"; // Paper beats rock
-    case "scissors":
-      return compChoice === "paper"; // Scissors beats paper
-    default:
-      return false;
-  }
-};
-
-// Function to generate a random move for the computer
-const generateCompMove = () => {
   const options = ["rock", "paper", "scissors"];
-  const randomIndex = Math.floor(Math.random() * 3);
-  return options[randomIndex]; // Randomly select rock, paper, or scissors
+  const compChoice = options[Math.floor(Math.random() * options.length)];
+  
+  const winConditions = { rock: "scissors", paper: "rock", scissors: "paper" };
+  const outcome = userChoice === compChoice ? "draw" : (winConditions[userChoice] === compChoice ? "win" : "lose");
+  
+  finalizeRound(outcome, userChoice, compChoice);
 };
 
-// Function to handle user's choice
-const handleUserChoice = (userChoice) => {
-  // Display user's choice
-  userChoiceDisplay.innerText = `Your choice: ${userChoice}`;
-
-  // Generate computer's move and display it
-  const compChoice = generateCompMove();
-  compChoiceDisplay.innerText = `Computer's choice: ${compChoice}`;
-
-  // Determine the winner based on choices
-  determineWinner(userChoice, compChoice);
+const resetGame = () => {
+  userScore = 0;
+  compScore = 0;
+  winStreak = 0;
+  userScoreDisplay.innerText = "0";
+  compScoreDisplay.innerText = "0";
+  userChoiceVal.innerText = "—";
+  compChoiceVal.innerText = "—";
+  updateStats();
 };
 
-// Add event listeners to all choice elements
+// Initialize
+updateStats();
+
 choices.forEach((choice) => {
   choice.addEventListener("click", () => {
-    const userChoice = choice.getAttribute("id"); // Get the id (rock, paper, or scissors)
-    handleUserChoice(userChoice); // Handle the user's selection
+    playRound(choice.getAttribute("id"));
   });
 });
+
+resetBtn.addEventListener("click", resetGame);
